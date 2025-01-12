@@ -11,12 +11,16 @@ from streamlit_folium import st_folium
 from cachetools import cached, TTLCache
 
 # Google Places API Key
-API_KEY = "AIzaSyD9RqTUdot3jwnmuechqQMiKDBgY-72k2o"
+API_KEY = st.secrets["API_KEY"]
 
 # Load JSON data
-JSON_PATH = r"C:\\Users\\rajasvi\\OneDrive - Volkswagen Group of America\\Desktop\\Google Review\\dealers_data.json"
-with open(JSON_PATH, "r", encoding="utf-8") as f:
-    dealers_data = json.load(f)
+JSON_PATH = "dealers_data.json"
+try:
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        dealers_data = json.load(f)
+except FileNotFoundError:
+    st.error(f"The file {JSON_PATH} was not found. Please ensure it is in the same directory as this script.")
+    st.stop()
 
 # Convert JSON to DataFrame
 data = []
