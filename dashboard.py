@@ -210,4 +210,4 @@ def dealer_map():
                 icon=folium.Icon(color="blue" if row["Rating"] >= 4 else "red")
             ).add_to(dealer_map)
 
-    st_folium(dealer_map, width=700
+    st_folium(dealer_map, width=700)
