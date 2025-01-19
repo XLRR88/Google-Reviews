@@ -63,6 +63,43 @@ for index, row in df.iterrows():
         df.at[index, "Latitude"] = lat
         df.at[index, "Longitude"] = lng
 
+# Fetch Live Reviews
+def fetch_live_reviews(dealers):
+    """Fetch live reviews and ratings for dealers using Google Places API."""
+    updated_dealers = []
+
+    for dealer in dealers:
+        place_id = dealer.get("place_id")  # Assuming place_id exists in the dataset
+        if not place_id:
+            dealer["Status"] = "Failed: No Place ID"
+            updated_dealers.append(dealer)
+            continue
+
+        # API call to fetch details
+        url = f"https://maps.googleapis.com/maps/api/place/details/json"
+        params = {
+            "place_id": place_id,
+            "fields": "name,rating,user_ratings_total,reviews",
+            "key": API_KEY,
+        }
+
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            result = response.json().get("result", {})
+            if result:
+                dealer["Rating"] = result.get("rating")
+                dealer["Total Reviews"] = result.get("user_ratings_total")
+                dealer["Reviews"] = result.get("reviews", [])
+                dealer["Status"] = "Updated"
+            else:
+                dealer["Status"] = "Failed: No Results"
+        else:
+            dealer["Status"] = f"Failed: {response.status_code}"
+
+        updated_dealers.append(dealer)
+
+    return updated_dealers
+
 # Analyze Sentiment
 def analyze_sentiment(reviews):
     sentiment_summary = {"Positive": 0, "Neutral": 0, "Negative": 0}
@@ -166,37 +203,4 @@ def dealer_map():
     dealer_map = folium.Map(location=map_center, zoom_start=4)
 
     for _, row in filtered_df.iterrows():
-        if pd.notna(row["Latitude"]) and pd.notna(row["Longitude"]):
-            folium.Marker(
-                location=[row["Latitude"], row["Longitude"]],
-                popup=f"{row['Dealer']}: {row['Rating']} stars",
-                icon=folium.Icon(color="blue" if row["Rating"] >= 4 else "red")
-            ).add_to(dealer_map)
-
-    st_folium(dealer_map, width=700, height=500)
-
-# Refresh Data
-def refresh_data():
-    st.subheader("Refresh Dealer Data")
-
-    if st.button("Refresh All Data"):
-        updated_dealers = fetch_live_reviews(df.to_dict(orient="records"))
-        for entry in updated_dealers:
-            if entry["Status"] == "Updated":
-                st.success(f"Updated data for {entry['Dealer']}")
-            else:
-                st.error(f"Failed to update data for {entry['Dealer']}" )
-
-    st.sidebar.write(f"### Last Refreshed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
-# Assign functions to tabs
-with tabs[0]:
-    national_overview()
-with tabs[1]:
-    dealer_insights()
-with tabs[2]:
-    review_trends()
-with tabs[3]:
-    dealer_map()
-with tabs[4]:
-    refresh_data()
+        if pd.notna(row["Latitude"]) and pd.notna(row[
