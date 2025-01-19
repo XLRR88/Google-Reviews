@@ -58,7 +58,7 @@ def geocode_postal_code(postal_code):
 
 # Add geocoded coordinates if missing
 for index, row in df.iterrows():
-    if pd.isna(row["Latitude"]) or pd.isna(row["Longitude"]):
+    if pd.isna(row["Latitude"]):
         lat, lng = geocode_postal_code(row.get("PostalCode", ""))
         df.at[index, "Latitude"] = lat
         df.at[index, "Longitude"] = lng
@@ -203,4 +203,11 @@ def dealer_map():
     dealer_map = folium.Map(location=map_center, zoom_start=4)
 
     for _, row in filtered_df.iterrows():
-        if pd.notna(row["Latitude"]) and pd.notna(row[
+        if pd.notna(row["Latitude"]) and pd.notna(row["Longitude"]):
+            folium.Marker(
+                location=[row["Latitude"], row["Longitude"]],
+                popup=f"{row['Dealer']}: {row['Rating']} stars",
+                icon=folium.Icon(color="blue" if row["Rating"] >= 4 else "red")
+            ).add_to(dealer_map)
+
+    st_folium(dealer_map, width=700
