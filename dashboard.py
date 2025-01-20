@@ -210,4 +210,30 @@ def dealer_map():
                 icon=folium.Icon(color="blue" if row["Rating"] >= 4 else "red")
             ).add_to(dealer_map)
 
-    st_folium(dealer_map, width=700)
+    st_folium(dealer_map, width=700, height=500)
+
+# Refresh Data
+def refresh_data():
+    st.subheader("Refresh Dealer Data")
+
+    if st.button("Refresh All Data"):
+        updated_dealers = fetch_live_reviews(df.to_dict(orient="records"))
+        for entry in updated_dealers:
+            if entry["Status"] == "Updated":
+                st.success(f"Updated data for {entry['Dealer']}")
+            else:
+                st.error(f"Failed to update data for {entry['Dealer']}")
+
+    st.sidebar.write(f"### Last Refreshed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+# Assign functions to tabs
+with tabs[0]:
+    national_overview()
+with tabs[1]:
+    dealer_insights()
+with tabs[2]:
+    review_trends()
+with tabs[3]:
+    dealer_map()
+with tabs[4]:
+    refresh_data()
