@@ -58,10 +58,8 @@ def geocode_postal_code(postal_code):
 
 # Add geocoded coordinates if missing
 for index, row in df.iterrows():
-    if pd.isna(row["Latitude"]) or pd.isna(row["Longitude"]):
+    if pd.isna(row["Latitude"]):
         lat, lng = geocode_postal_code(row.get("PostalCode", ""))
-        if lat is None or lng is None:
-            st.warning(f"Geocode failed for Postal Code: {row.get('PostalCode', '')}")
         df.at[index, "Latitude"] = lat
         df.at[index, "Longitude"] = lng
 
@@ -141,9 +139,6 @@ rating_range = st.sidebar.slider("Rating Range", min_value=1.0, max_value=5.0, v
 
 # Filtered Data
 filtered_df = filter_data(start_date, end_date, province_filter, rating_range, dealer_filter)
-
-# Print filtered data for debugging
-st.write(filtered_df[['Dealer', 'Latitude', 'Longitude']])
 
 # Tabs for different analyses
 tabs = st.tabs(["National Overview", "Dealer Insights", "Review Trends", "Dealer Map", "Refresh Data"])
@@ -242,6 +237,3 @@ with tabs[3]:
     dealer_map()
 with tabs[4]:
     refresh_data()
-```
-
-You can now update the `dashboard.py` file in your repository with this code. This code includes the debug print statement to display the filtered DataFrame with `Dealer`, `Latitude`, and `Longitude` columns.
