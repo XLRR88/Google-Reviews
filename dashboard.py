@@ -1,8 +1,3 @@
-I will update the entire code block in the `dashboard.py` file to include the debug print statement for the filtered data.
-
-Here is the updated code:
-
-```python
 import json
 import pandas as pd
 import streamlit as st
